@@ -1,12 +1,25 @@
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
-
+  // Rota raiz: útil pra status rápido no browser
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  root() {
+    return {
+      name: 'rpg-gym-api',
+      status: 'online',
+    };
+  }
+
+  // Base da API
+  @Get('api')
+  api() {
+    return 'RPG Gym API Online';
+  }
+
+  // Healthcheck (ideal para monitoramento)
+  @Get('api/health')
+  health() {
+    return { status: 'ok' };
   }
 }
