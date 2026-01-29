@@ -17,10 +17,7 @@ export class AuthService {
       where: { email },
       select: { id: true },
     });
-
-    if (existing) {
-      throw new BadRequestException('Email already registered');
-    }
+    if (existing) throw new BadRequestException('Email already registered');
 
     const passwordHash = await bcrypt.hash(input.password, 10);
 
@@ -30,11 +27,14 @@ export class AuthService {
         password: passwordHash,
         name: input.name ?? null,
 
-        // RPG básicos (garantidos no seu Prisma atual)
+        // RPG que EXISTE no seu schema.prisma do print
         level: 1,
         xp: 0,
         gold: 0,
-        className: 'Novato',
+        str: 1,
+        dex: 1,
+        int: 1,
+        vit: 1,
       },
       select: {
         id: true,
@@ -43,15 +43,15 @@ export class AuthService {
         level: true,
         xp: true,
         gold: true,
-        className: true,
+        str: true,
+        dex: true,
+        int: true,
+        vit: true,
         createdAt: true,
       },
     });
 
-    const token = await this.jwt.signAsync({
-      sub: user.id,
-      email: user.email,
-    });
+    const token = await this.jwt.signAsync({ sub: user.id, email: user.email });
 
     return { message: 'registered', token, user };
   }
@@ -61,7 +61,6 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({
       where: { email },
-      // IMPORTANTÍSSIMO: selecionar password explicitamente
       select: {
         id: true,
         email: true,
@@ -71,7 +70,10 @@ export class AuthService {
         level: true,
         xp: true,
         gold: true,
-        className: true,
+        str: true,
+        dex: true,
+        int: true,
+        vit: true,
       },
     });
 
@@ -80,10 +82,7 @@ export class AuthService {
     const ok = await bcrypt.compare(input.password, user.password);
     if (!ok) throw new BadRequestException('Email ou senha inválidos');
 
-    const token = await this.jwt.signAsync({
-      sub: user.id,
-      email: user.email,
-    });
+    const token = await this.jwt.signAsync({ sub: user.id, email: user.email });
 
     return {
       message: 'logged in',
@@ -95,7 +94,10 @@ export class AuthService {
         level: user.level,
         xp: user.xp,
         gold: user.gold,
-        className: user.className,
+        str: user.str,
+        dex: user.dex,
+        int: user.int,
+        vit: user.vit,
       },
     };
   }
