@@ -28,7 +28,11 @@ export class AuthController {
 
     return {
       message: 'registered',
-      user: { id: user.id, email: user.email, name: user.name },
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
     };
   }
 
@@ -45,7 +49,11 @@ export class AuthController {
     return {
       message: 'logged in',
       token: 'jwt_fake_por_enquanto',
-      user: { id: user.id, email: user.email, name: user.name },
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
     };
   }
 }
