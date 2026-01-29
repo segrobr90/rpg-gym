@@ -1,0 +1,49 @@
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcryptjs';
+import { PrismaService } from '../database/prisma.service';
+
+@Injectable()
+export class AuthService {
+  constructor(private prisma: PrismaService, private jwt: JwtService) {}
+
+  async register(input: { email: string; password: string; name?: string }) {
+    const email = input.email.trim().toLowerCase();
+
+    const existing = await this.prisma.user.findUnique({ where: { email } });
+    if (existing) throw new BadRequestException('Email already registered');
+
+    const passwordHash = await bcrypt.hash(input.password, 10);
+
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        password: passwordHash,
+        name: input.name,
+      },
+      select: { id: true, email: true, name: true, createdAt: true },
+    });
+
+    const token = await this.jwt.signAsync({ sub: user.id, email: user.email });
+
+    return { message: 'registered', token, user };
+  }
+
+  async login(input: { email: string; password: string }) {
+    const email = input.email.trim().toLowerCase();
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new BadRequestException('Email ou senha inválidos');
+
+    const ok = await bcrypt.compare(input.password, user.password);
+    if (!ok) throw new BadRequestException('Email ou senha inválidos');
+
+    const token = await this.jwt.signAsync({ sub: user.id, email: user.email });
+
+    return {
+      message: 'logged in',
+      token,
+      user: { id: user.id, email: user.email, name: user.name },
+    };
+  }
+}
