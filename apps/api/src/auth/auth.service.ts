@@ -15,7 +15,6 @@ export class AuthService {
 
     const existing = await this.prisma.user.findUnique({
       where: { email },
-      select: { id: true },
     });
 
     if (existing) {
@@ -30,11 +29,10 @@ export class AuthService {
         password: passwordHash,
         name: input.name ?? null,
 
-        // RPG (somente o que o Prisma do deploy está reconhecendo)
+        // defaults RPG já existentes no schema
         level: 1,
         xp: 0,
         gold: 0,
-        className: 'Novato',
       },
       select: {
         id: true,
@@ -43,7 +41,6 @@ export class AuthService {
         level: true,
         xp: true,
         gold: true,
-        className: true,
         createdAt: true,
       },
     });
@@ -53,7 +50,11 @@ export class AuthService {
       email: user.email,
     });
 
-    return { message: 'registered', token, user };
+    return {
+      message: 'registered',
+      token,
+      user,
+    };
   }
 
   async login(input: { email: string; password: string }) {
@@ -61,23 +62,26 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({
       where: { email },
-      // seleciona explicitamente password e os campos que existem
       select: {
         id: true,
         email: true,
-        name: true,
         password: true,
+        name: true,
         level: true,
         xp: true,
         gold: true,
-        className: true,
       },
     });
 
-    if (!user) throw new BadRequestException('Email ou senha inválidos');
+    if (!user) {
+      throw new BadRequestException('Email ou senha inválidos');
+    }
 
     const ok = await bcrypt.compare(input.password, user.password);
-    if (!ok) throw new BadRequestException('Email ou senha inválidos');
+
+    if (!ok) {
+      throw new BadRequestException('Email ou senha inválidos');
+    }
 
     const token = await this.jwt.signAsync({
       sub: user.id,
@@ -94,7 +98,6 @@ export class AuthService {
         level: user.level,
         xp: user.xp,
         gold: user.gold,
-        className: user.className,
       },
     };
   }
