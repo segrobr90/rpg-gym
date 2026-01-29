@@ -2,8 +2,8 @@ import { Controller, Get } from '@nestjs/common';
 
 @Controller()
 export class AppController {
-  @Get('health')
+  @Get()
   health() {
-    return { status: 'ok' };
+    return { ok: true, service: 'rpg-gym-api' };
   }
 }
