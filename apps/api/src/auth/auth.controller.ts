@@ -6,35 +6,35 @@ export class AuthController {
   constructor(private prisma: PrismaService) {}
 
   @Post('register')
-  async register(
-    @Body()
-    body: { email: string; password: string; name?: string },
-  ) {
-    const existingUser = await this.prisma.user.findUnique({
+  async register(@Body() body: { email: string; password: string; name?: string }) {
+    const existing = await this.prisma.user.findUnique({
       where: { email: body.email },
     });
 
-    if (existingUser) {
-      throw new BadRequestException('Email já cadastrado');
+    if (existing) {
+      throw new BadRequestException('Email already registered');
     }
 
     const user = await this.prisma.user.create({
       data: {
         email: body.email,
-        password: body.password,
-        name: body.name ?? 'Player',
+        password: body.password, // depois a gente faz hash
+        name: body.name,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
       },
     });
 
     return {
       message: 'registered',
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      },
+      user,
     };
   }
+
 
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
