@@ -10,20 +10,8 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
+  password  String
   name      String?
   createdAt DateTime @default(now())
-
-  character Character?
-}
-
-model Character {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  strength  Int      @default(1)
-  endurance Int      @default(1)
-  mobility  Int      @default(1)
-  vitality  Int      @default(1)
-
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
