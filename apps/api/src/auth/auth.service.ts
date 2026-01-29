@@ -15,6 +15,7 @@ export class AuthService {
 
     const existing = await this.prisma.user.findUnique({
       where: { email },
+      select: { id: true },
     });
 
     if (existing) {
@@ -27,16 +28,13 @@ export class AuthService {
       data: {
         email,
         password: passwordHash,
-        name: input.name,
+        name: input.name ?? null,
 
-        // 🎮 CAMPOS RPG (compatíveis com o schema atual)
+        // RPG básicos (garantidos no seu Prisma atual)
         level: 1,
         xp: 0,
         gold: 0,
-        str: 1,
-        dex: 1,
-        int: 1,
-        vit: 1,
+        className: 'Novato',
       },
       select: {
         id: true,
@@ -45,10 +43,7 @@ export class AuthService {
         level: true,
         xp: true,
         gold: true,
-        str: true,
-        dex: true,
-        int: true,
-        vit: true,
+        className: true,
         createdAt: true,
       },
     });
@@ -58,11 +53,7 @@ export class AuthService {
       email: user.email,
     });
 
-    return {
-      message: 'registered',
-      token,
-      user,
-    };
+    return { message: 'registered', token, user };
   }
 
   async login(input: { email: string; password: string }) {
@@ -70,29 +61,24 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({
       where: { email },
+      // IMPORTANTÍSSIMO: selecionar password explicitamente
       select: {
         id: true,
         email: true,
         name: true,
         password: true,
+
         level: true,
         xp: true,
         gold: true,
-        str: true,
-        dex: true,
-        int: true,
-        vit: true,
+        className: true,
       },
     });
 
-    if (!user) {
-      throw new BadRequestException('Email ou senha inválidos');
-    }
+    if (!user) throw new BadRequestException('Email ou senha inválidos');
 
     const ok = await bcrypt.compare(input.password, user.password);
-    if (!ok) {
-      throw new BadRequestException('Email ou senha inválidos');
-    }
+    if (!ok) throw new BadRequestException('Email ou senha inválidos');
 
     const token = await this.jwt.signAsync({
       sub: user.id,
@@ -109,10 +95,7 @@ export class AuthService {
         level: user.level,
         xp: user.xp,
         gold: user.gold,
-        str: user.str,
-        dex: user.dex,
-        int: user.int,
-        vit: user.vit,
+        className: user.className,
       },
     };
   }
