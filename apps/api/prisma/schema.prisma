@@ -12,6 +12,13 @@ model User {
   email     String   @unique
   password  String
   name      String?
+
+  // 👇 CAMPOS RPG
+  level     Int      @default(1)
+  xp        Int      @default(0)
+  gold      Int      @default(0)
+  className String   @default("Novato")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
