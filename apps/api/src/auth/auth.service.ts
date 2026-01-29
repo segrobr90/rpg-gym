@@ -27,13 +27,16 @@ export class AuthService {
       data: {
         email,
         password: passwordHash,
-        name: input.name ?? 'Novato',
+        name: input.name,
 
-        // 🎮 CAMPOS RPG (defaults)
+        // 🎮 CAMPOS RPG (compatíveis com o schema atual)
         level: 1,
         xp: 0,
         gold: 0,
-        className: 'Novato',
+        str: 1,
+        dex: 1,
+        int: 1,
+        vit: 1,
       },
       select: {
         id: true,
@@ -42,7 +45,10 @@ export class AuthService {
         level: true,
         xp: true,
         gold: true,
-        className: true,
+        str: true,
+        dex: true,
+        int: true,
+        vit: true,
         createdAt: true,
       },
     });
@@ -68,15 +74,18 @@ export class AuthService {
         id: true,
         email: true,
         name: true,
-        password: true, // 🔑 obrigatório para bcrypt
+        password: true,
         level: true,
         xp: true,
         gold: true,
-        className: true,
+        str: true,
+        dex: true,
+        int: true,
+        vit: true,
       },
     });
 
-    if (!user || !user.password) {
+    if (!user) {
       throw new BadRequestException('Email ou senha inválidos');
     }
 
@@ -100,7 +109,10 @@ export class AuthService {
         level: user.level,
         xp: user.xp,
         gold: user.gold,
-        className: user.className,
+        str: user.str,
+        dex: user.dex,
+        int: user.int,
+        vit: user.vit,
       },
     };
   }
