@@ -27,7 +27,7 @@ export class AuthService {
       data: {
         email,
         password: passwordHash,
-        name: input.name,
+        name: input.name ?? 'Novato',
 
         // 🎮 CAMPOS RPG (defaults)
         level: 1,
@@ -64,14 +64,23 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({
       where: { email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        password: true, // 🔑 obrigatório para bcrypt
+        level: true,
+        xp: true,
+        gold: true,
+        className: true,
+      },
     });
 
-    if (!user) {
+    if (!user || !user.password) {
       throw new BadRequestException('Email ou senha inválidos');
     }
 
     const ok = await bcrypt.compare(input.password, user.password);
-
     if (!ok) {
       throw new BadRequestException('Email ou senha inválidos');
     }
