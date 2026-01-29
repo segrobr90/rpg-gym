@@ -7,9 +7,7 @@ export class AuthController {
   constructor(private auth: AuthService) {}
 
   @Post('register')
-  register(
-    @Body() body: { email: string; password: string; name?: string },
-  ) {
+  register(@Body() body: { email: string; password: string; name?: string }) {
     return this.auth.register(body);
   }
 
@@ -18,10 +16,12 @@ export class AuthController {
     return this.auth.login(body);
   }
 
-  // ✅ rota protegida para testar o JWT
+  // ✅ rota protegida pra testar JWT
   @UseGuards(JwtAuthGuard)
   @Get('me')
   me(@Req() req: any) {
-    return { user: req.user };
+    return {
+      user: req.user, // vem do JwtStrategy.validate()
+    };
   }
 }
